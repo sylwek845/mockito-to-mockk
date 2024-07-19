@@ -53,7 +53,6 @@ fun String.substringBetweenBraces(
 
 fun String.findEndOfFunctionOrVariable(
     startAfterIndex: Int = 0,
-):Pair<Int,String> {
-
+): Pair<IntRange, String> {
     TODO()
 }

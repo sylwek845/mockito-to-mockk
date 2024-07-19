@@ -73,9 +73,9 @@ class VerifyConverter1 {
         const val TIMES_PREFIX = "times("
         const val AT_MOST_PREFIX = "atMost("
         const val AT_LEAST_PREFIX = "atLeast("
-        const val NO_MORE_PREFIX = "verifyNoMoreInteractions("
-        const val NO_INTERACTION = "verifyNoInteractions("
         const val NEVER = "never()"
         const val AT_LEAST_ONCE = "atLeastOnce()"
+        const val NO_INTERACTION = "verifyNoInteractions("
+        const val NO_MORE_PREFIX = "verifyNoMoreInteractions("
     }
 }
