@@ -1,13 +1,11 @@
+<h1>Mockito to mockk migration tool</h1>
 
+TODO
+1. Fix Verify
+2. Implement argumentCaptor to slot
+3. Add more tests coverages
+4. Add main function which takes path param to file
+5. **Optional** Convert into gradle plugin?-> Release?
+6. Update Readme
+7. Make it public
 
-1. Check whole file for specific text (ie `when` or `whenever`)
-2. Extract
-3. Convert
-4. Return
-5. Repeat for next Tag
-
-
-Eg.
-
-1. Imports
-2. 
