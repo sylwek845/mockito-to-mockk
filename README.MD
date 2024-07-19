@@ -2,7 +2,6 @@
 <h1>Mockito to mockk migration tool</h1>
 
 TODO
-1. Fix Verify
 2. Implement argumentCaptor to slot
 3. Add more tests coverages
 4. Add main function which takes path param to file
