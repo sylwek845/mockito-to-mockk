@@ -35,9 +35,7 @@ class VerifyConverter {
         return updatedText
     }
 
-    var c = 0
     private fun String.extractVerifyData(): VerifyData? {
-        c++
         val startIndex = indexOf(PREDICATE)
         if (startIndex == -1) return null
         val bracket = BracketType.Parentheses
