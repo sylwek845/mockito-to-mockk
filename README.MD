@@ -10,3 +10,7 @@ TODO
 6. Update Readme
 7. Make it public
 
+Known Issues
+
+1. Parser may fail if function or param name contains escape chars
+2. Unnecessary spaces may break the parser - format the code before running it

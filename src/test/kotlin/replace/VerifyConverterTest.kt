@@ -24,13 +24,28 @@ internal class VerifyConverterTest {
     @Language("kotlin")
     private val example1Mockito = """
         verify(mock)
-    .testNewLine()
+        .testNewLine()
+    """.trimIndent()
+
+    @Language("kotlin")
+    private val example2Mockito = """
+        verify(mock).testNewLine()
+        verify(mock1).testNewLine2(321421,mock())
+        verify(mock2).testNewLine5<String>(321421,mock<Long>())
+        verify(mock3).testNewLine4<String>(321421,any<Long>())
     """.trimIndent()
 
     @Language("kotlin")
     private val example1MockK = """
-        verify { mock
-    .testNewLine() }
+        verify { mock.testNewLine() }
+    """.trimIndent()
+
+    @Language("kotlin")
+    private val example2MockK = """
+        verify { mock.testNewLine() }
+        verify { mock1.testNewLine2(321421,mock()) }
+        verify { mock2.testNewLine5<String>(321421,mock<Long>()) }
+        verify { mock3.testNewLine4<String>(321421,any<Long>()) }
     """.trimIndent()
 
     private fun args() = listOf(
@@ -49,7 +64,7 @@ internal class VerifyConverterTest {
             "verifyNoInteractions(mock, mock2, mock3)",
             "verify { mock wasNot Called }\nverify { mock2 wasNot Called }\nverify { mock3 wasNot Called }"
         ),
-        Arguments.of(example1Mockito, example1MockK)
-//        Arguments.of()
+        Arguments.of(example1Mockito, example1MockK),
+        Arguments.of(example2Mockito, example2MockK),
     )
 }

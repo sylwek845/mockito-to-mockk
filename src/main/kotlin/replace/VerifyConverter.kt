@@ -2,6 +2,7 @@ package replace
 
 import logs.LogKeeper
 import tools.BracketType
+import tools.findEndOfFunctionOrVariable
 import tools.substringBetweenBraces
 
 class VerifyConverter {
@@ -45,21 +46,11 @@ class VerifyConverter {
         val extractedAll = extracted.split(",")
         val extractedObjectName = extractedAll.first()
         val params = extractedAll.drop(1)
-        val endBlockIndex = indexOf(").") + 2
-        val indexOfFirstBracketAfterVerify = indexOf("(", endBlockIndex)
-        val indexOfFirstSpaceAfterVerify = indexOf("\n", endBlockIndex + 2) // This is to escape from .\n
-        val extractedStatement = if (indexOfFirstSpaceAfterVerify < indexOfFirstBracketAfterVerify) {
-            // Use bracket
-            val bracesContent = "(${substringBetweenBraces(startAfterIndex = endBlockIndex).orEmpty()})"
-            val braceIndex = indexOf(bracesContent)
-            substring(startIndex = endBlockIndex, endIndex = braceIndex + bracesContent.length)
-        } else {
-            substring(IntRange(start = endBlockIndex, indexOfFirstSpaceAfterVerify))
-            // Use space
-        }
-        val lastIndex = indexOf(startIndex = startIndex, string = extractedStatement) + extractedStatement.length - 1
-        val wholeBlock = "${extractedObjectName}.$extractedStatement"
-        val range = IntRange(startIndex, startIndex + lastIndex)
+        val endBlockIndex = indexOf(startIndex = startIndex, char = '.') + 1
+        val extractedStatement = findEndOfFunctionOrVariable(endBlockIndex) ?: return null
+        val lastIndex = extractedStatement.first
+        val wholeBlock = "${extractedObjectName}.${extractedStatement.second}"
+        val range = IntRange(startIndex, lastIndex - 1)
         return VerifyData(
             rangeOfOriginalCode = range,
             extractedVerify = wholeBlock,
