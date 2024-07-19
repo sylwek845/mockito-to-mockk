@@ -1,14 +1,14 @@
 package replace
 
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class VerifyConverter1Test {
+internal class VerifyConverterTest {
     private val verifyConverter1 = VerifyConverter()
 
     @ParameterizedTest(name = "#{index}: input={0}, expected={1}")
@@ -24,13 +24,28 @@ internal class VerifyConverter1Test {
     @Language("kotlin")
     private val example1Mockito = """
         verify(mock)
-    .testNewLine()
+        .testNewLine()
+    """.trimIndent()
+
+    @Language("kotlin")
+    private val example2Mockito = """
+        verify(mock).testNewLine()
+        verify(mock1).testNewLine2(321421,mock())
+        verify(mock2).testNewLine5<String>(321421,mock<Long>())
+        verify(mock3).testNewLine4<String>(321421,any<Long>())
     """.trimIndent()
 
     @Language("kotlin")
     private val example1MockK = """
-        verify { mock
-    .testNewLine() }
+        verify { mock.testNewLine() }
+    """.trimIndent()
+
+    @Language("kotlin")
+    private val example2MockK = """
+        verify { mock.testNewLine() }
+        verify { mock1.testNewLine2(321421,mock()) }
+        verify { mock2.testNewLine5<String>(321421,mock<Long>()) }
+        verify { mock3.testNewLine4<String>(321421,any<Long>()) }
     """.trimIndent()
 
     private fun args() = listOf(
@@ -49,7 +64,7 @@ internal class VerifyConverter1Test {
             "verifyNoInteractions(mock, mock2, mock3)",
             "verify { mock wasNot Called }\nverify { mock2 wasNot Called }\nverify { mock3 wasNot Called }"
         ),
-        Arguments.of(example1Mockito, example1MockK)
-//        Arguments.of()
+        Arguments.of(example1Mockito, example1MockK),
+        Arguments.of(example2Mockito, example2MockK),
     )
 }

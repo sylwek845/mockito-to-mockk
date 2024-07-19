@@ -1,17 +1,17 @@
 package tools
 
-import org.junit.jupiter.api.Assertions.*
+import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import testfiles.TestData1
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class UtilsKtTest {
 
     @ParameterizedTest(name = "#{index}: input={0}, expected={1}, which={2}, bracketType={3}, startingFrom={4}")
-    @MethodSource("args")
+    @MethodSource("argsBracketTest")
     fun `convert, input with brackets, expect extracted string`(
         input: String,
         expected: String?,
@@ -29,23 +29,33 @@ internal class UtilsKtTest {
         )
     }
 
-    private fun args() = listOf(
-        Arguments.of("something(mock)", "mock", 0, BracketType.Parentheses, 0, ),
-        Arguments.of("something(mock)", null, 1, BracketType.Parentheses, 0, ),
-        Arguments.of("something(mock(mock1))", "mock(mock1)", 0, BracketType.Parentheses, 0, ),
-        Arguments.of("something(mock(mock1))", "mock1", 1, BracketType.Parentheses, 0, ),
-        Arguments.of("something(mock(mock1)).doReturn(this)", "mock(mock1)", 0, BracketType.Parentheses, 0, ),
-        Arguments.of("something(mock(mock1(mock2)))", "mock2", 2, BracketType.Parentheses, 0, ),
-        Arguments.of("something{mock{mock1{mock2}}}", "mock2", 2, BracketType.Braces, 0, ),
-        Arguments.of("ew().something{mock{mock1{mock2}}}", "mock2", 2, BracketType.Braces, 0, ),
-        Arguments.of(multiLineInput, multiLineExptected, 0, BracketType.Parentheses, 0, ),
-        Arguments.of(
-            TestData1.testFile1,
-            "stateHandler.initialState(any(),eq(uid))",
-            0,
-            BracketType.Parentheses,
-            2297,
-        ),
+    @ParameterizedTest(name = "#{index}: input={0}, output={1}")
+    @MethodSource("argsEndOfFunctionVariable")
+    fun `findEndOfFunctionOrVariable test`(
+        input: String,
+        output: Pair<IntRange, String>,
+    ) {
+        val actual = input.findEndOfFunctionOrVariable(startAfterIndex = output.first.first)
+        assertEquals(
+            output.second.ignoreSpaces(),
+            actual?.second.ignoreSpaces(),
+        )
+        assertEquals(
+            output.first.last,
+            actual?.first,
+        )
+    }
+
+    private fun argsBracketTest() = listOf(
+        Arguments.of("something(mock)", "mock", 0, BracketType.Parentheses, 0),
+        Arguments.of("something(mock)", null, 1, BracketType.Parentheses, 0),
+        Arguments.of("something(mock(mock1))", "mock(mock1)", 0, BracketType.Parentheses, 0),
+        Arguments.of("something(mock(mock1))", "mock1", 1, BracketType.Parentheses, 0),
+        Arguments.of("something(mock(mock1)).doReturn(this)", "mock(mock1)", 0, BracketType.Parentheses, 0),
+        Arguments.of("something(mock(mock1(mock2)))", "mock2", 2, BracketType.Parentheses, 0),
+        Arguments.of("something{mock{mock1{mock2}}}", "mock2", 2, BracketType.Braces, 0),
+        Arguments.of("ew().something{mock{mock1{mock2}}}", "mock2", 2, BracketType.Braces, 0),
+        Arguments.of(multiLineInput, multiLineExptected, 0, BracketType.Parentheses, 0),
     )
 
     private val multiLineInput = """
@@ -63,4 +73,34 @@ internal class UtilsKtTest {
             )""".trimIndent()
 
     private fun String?.ignoreSpaces(): String? = this?.replace(" ", "")?.replace("\n", "")
+
+    private val multiLineFVInput = """
+         verify(someClass).
+         testFunction(someParam,someParam)
+         getSomeData()
+     """.trimIndent()
+
+    @Language("kotlin")
+    private val example1Mockito = """
+        verify(mock)
+        .testNewLine()
+
+    someCode()
+    """.trimIndent()
+
+    private fun argsEndOfFunctionVariable() = listOf(
+        Arguments.of(
+            "verify(someClass).testFunction() \n\n verify(someClass).testFunction()",
+            IntRange(18, 32) to "testFunction()"
+        ),
+        Arguments.of(
+            "verify(someClass).testFunction(someParam)  \n" +
+                    "\n" +
+                    " verify(someClass).testFunction()", IntRange(18, 41) to "testFunction(someParam)"
+        ),
+        Arguments.of("verify(someClass).testVariable", IntRange(18, 29) to "testVariable"),
+        Arguments.of("verify(someClass).testVariable\n\n", IntRange(18, 31) to "testVariable"),
+        Arguments.of(multiLineFVInput, IntRange(18, 52) to "testFunction(someParam,someParam)"),
+        Arguments.of(example1Mockito, IntRange(example1Mockito.indexOf(".") + 1, 35) to "testNewLine()"),
+    )
 }
