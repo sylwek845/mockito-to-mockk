@@ -1,14 +1,14 @@
 package replace
 
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class VerifyConverter1Test {
+internal class VerifyConverterTest {
     private val verifyConverter1 = VerifyConverter()
 
     @ParameterizedTest(name = "#{index}: input={0}, expected={1}")
