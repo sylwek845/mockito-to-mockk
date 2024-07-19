@@ -1,7 +1,8 @@
 package replace
 
+import logs.LogKeeper
 import tools.BracketType
-import tools.substringBetween
+import tools.findEndOfFunctionOrVariable
 import tools.substringBetweenBraces
 
 class VerifyConverter {
@@ -9,7 +10,8 @@ class VerifyConverter {
     fun convert(textToConvert: String): String {
         val updatedText = textToConvert.parseNoInteractions().parseNoMoreInteractions()
         val updatedText2 = parseVerify(updatedText)
-        return updatedText2
+        val fixedVerifies = updatedText2.replace(FAKE_VERIFY, PREDICATE).replace(EMPTY_VERIFY_PARAMS, NO_VERIFY_PARAMS)
+        return fixedVerifies
     }
 
     private fun parseVerify(textToConvert: String): String {
@@ -18,7 +20,8 @@ class VerifyConverter {
         while (!doneConverting) {
             val extracted = updatedText.extractVerifyData()
             if (extracted != null) {
-                val toReplace = "verify { ${extracted.extractedVerify.trim()} }"
+                val verifyParams = extracted.remainingVerifyParams.prepareVerifyParamsForMockk()
+                val toReplace = "$FAKE_VERIFY$verifyParams) { ${extracted.extractedVerify.trim()} }"
                 ImportsConverter.addImports("io.mockk.verify")
                 val currentText = updatedText.replaceRange(extracted.rangeOfOriginalCode, toReplace)
                 if (currentText == updatedText) {
@@ -31,9 +34,8 @@ class VerifyConverter {
         }
         return updatedText
     }
-    var c=0
+
     private fun String.extractVerifyData(): VerifyData? {
-        c++
         val startIndex = indexOf(PREDICATE)
         if (startIndex == -1) return null
         val bracket = BracketType.Parentheses
@@ -41,22 +43,12 @@ class VerifyConverter {
             substringBetweenBraces(startAfterIndex = startIndex, bracketType = bracket) ?: return null
         val extractedAll = extracted.split(",")
         val extractedObjectName = extractedAll.first()
-        val params = extractedAll.drop(0)
-        val endBlockIndex = indexOf(").") + 2
-        val indexOfFirstBracketAfterVerify = indexOf("(", endBlockIndex)
-        val indexOfFirstSpaceAfterVerify = indexOf("\n", endBlockIndex + 2) // This is to escape from .\n
-        val extractedStatement = if (indexOfFirstSpaceAfterVerify < indexOfFirstBracketAfterVerify) {
-            // Use bracket
-            val bracesContent = "(${substringBetweenBraces(startAfterIndex = endBlockIndex).orEmpty()})"
-            val braceIndex = indexOf(bracesContent)
-            substring(startIndex = endBlockIndex, endIndex = braceIndex + bracesContent.length)
-        } else {
-            substring(IntRange(start = endBlockIndex, indexOfFirstSpaceAfterVerify))
-            // Use space
-        }
-        val lastIndex = indexOf(startIndex = startIndex, string = extractedStatement) + extractedStatement.length - 1
-        val wholeBlock = "${extractedObjectName}.$extractedStatement"
-        val range = IntRange(startIndex, startIndex + lastIndex)
+        val params = extractedAll.drop(1)
+        val endBlockIndex = indexOf(startIndex = startIndex, char = '.') + 1
+        val extractedStatement = findEndOfFunctionOrVariable(endBlockIndex) ?: return null
+        val lastIndex = extractedStatement.first
+        val wholeBlock = "${extractedObjectName}.${extractedStatement.second}"
+        val range = IntRange(startIndex, lastIndex - 1)
         return VerifyData(
             rangeOfOriginalCode = range,
             extractedVerify = wholeBlock,
@@ -81,6 +73,44 @@ class VerifyConverter {
         }
     }
 
+    private fun List<String>.prepareVerifyParamsForMockk(): String {
+        if (isEmpty()) return ""
+        return mapNotNull { item ->
+            when {
+                item.contains(TIMES_PREFIX) -> {
+                    val times = item.extractNumberOfVerifications(TIMES_PREFIX)
+                    "exactly = $times"
+                }
+
+                item.contains(NEVER) -> {
+                    "exactly = 0"
+                }
+
+                item.contains(AT_LEAST_ONCE) -> {
+                    "atLeast = 1"
+                }
+
+                item.contains(AT_LEAST_PREFIX) -> {
+                    val times = item.extractNumberOfVerifications(AT_LEAST_PREFIX)
+                    "atLeast = $times"
+                }
+
+                item.contains(AT_MOST_PREFIX) -> {
+                    val times = item.extractNumberOfVerifications(AT_MOST_PREFIX)
+                    "atMost = $times"
+                }
+
+                else -> {
+                    LogKeeper.logCritical("Failed to convert verify param $item please review missing param")
+                    null
+                }
+            }
+        }.joinToString(separator = ",") { it }
+    }
+
+    private fun String.extractNumberOfVerifications(prefix: String): String =
+        substringAfter(prefix).substringBefore(")")
+
     private data class VerifyData(
         val rangeOfOriginalCode: IntRange,
         val extractedVerify: String,
@@ -89,5 +119,14 @@ class VerifyConverter {
 
     private companion object {
         const val PREDICATE = "verify("
+        const val FAKE_VERIFY =
+            "ver@ify(" // This is required to avoid infinite loop, since the parser is looking for verify(
+        const val EMPTY_VERIFY_PARAMS = "verify()"
+        const val NO_VERIFY_PARAMS = "verify"
+        const val TIMES_PREFIX = "times("
+        const val AT_MOST_PREFIX = "atMost("
+        const val AT_LEAST_PREFIX = "atLeast("
+        const val NEVER = "never()"
+        const val AT_LEAST_ONCE = "atLeastOnce()"
     }
 }

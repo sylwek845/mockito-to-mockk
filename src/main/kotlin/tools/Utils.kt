@@ -1,5 +1,7 @@
 package tools
 
+import logs.LogKeeper
+
 fun String.substringBetween(after: String, before: String): String =
     substringAfter(after).substringBeforeLast(before)
 
@@ -53,7 +55,39 @@ fun String.substringBetweenBraces(
 
 fun String.findEndOfFunctionOrVariable(
     startAfterIndex: Int = 0,
-):Pair<Int,String> {
+): Pair<Int, String>? {
+    val slicedString = drop(startAfterIndex)
+    slicedString.forEachIndexed { index, c ->
+        when {
+            (slicedString.length - 1 == index) -> {
+                val code = substring(startIndex = startAfterIndex, endIndex = startAfterIndex + index + 1)
+                return startAfterIndex + index to code
+            }
 
-    TODO()
+            (!c.isLetterOrDigit() && !c.isParentheses()) && c.emptyChar() -> {
+                val code = substring(startIndex = startAfterIndex, endIndex = startAfterIndex + index + 1)
+                return startAfterIndex + index to code
+            }
+
+            !c.isLetterOrDigit() && c.isParentheses() -> {
+                val bracketStartingIndex = index + startAfterIndex
+                val extractedCode = substringBetweenBraces(startAfterIndex = bracketStartingIndex) ?: run {
+                    LogKeeper.logCritical("Did not find end of ( near index $bracketStartingIndex")
+                    return null
+                }
+                val fullCodeLen = extractedCode.length + 2 + index + startAfterIndex
+                val code = substring(startIndex = startAfterIndex, endIndex = fullCodeLen).trim()
+                return fullCodeLen to code
+            }
+        }
+    }
+    return null
+}
+
+private fun Char.emptyChar(): Boolean {
+    return this == ' '
+}
+
+private fun Char.isParentheses(): Boolean {
+    return this == '('
 }
