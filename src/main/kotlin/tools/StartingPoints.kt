@@ -19,7 +19,10 @@ internal object StartingPoints {
         "doReturn" to ReplaceOnlyData("returns") {},
         "mock(" to ReplaceOnlyData("mockk(relaxed = true,") {},
         "mock<" to ReplaceOnlyData("mockk<") {},
-        "spy(" to ReplaceOnlyData("= spy(") {},
+        "= mock {" to ReplaceOnlyData("= mockk {") {},
+        "mock {" to ReplaceOnlyData("mockk {") {},
+        "spy {" to ReplaceOnlyData("spyK {") {},
+        "spy(" to ReplaceOnlyData("= spyK(") {},
         "@Mock" to ReplaceOnlyData("@Mockk") {},
         "@Spy" to ReplaceOnlyData("@SpyK") {},
         "Mockito.reset(" to ReplaceOnlyData("clearMocks(")

@@ -1,5 +1,6 @@
 package replace
 
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
@@ -21,14 +22,30 @@ class MockingConverterTest {
         assertEquals(expected.trim(), actual.trim())
     }
 
+    @Language("kotlin")
+    private val testDataMockito1 = """
+           "private val someConfig: SomeConfig =
+           mock {
+               on { dailySummary } doReturn false
+           },
+    """.trimIndent()
+
+    @Language("kotlin")
+    private val testDataMockk1 = """
+           "private val someConfig: SomeConfig =
+           mockk {
+               every { dailySummary } returns false
+           },
+    """.trimIndent()
+
     private fun args() = listOf(
         Arguments.of(
             "whenever(someClass.someFunction())",
             "every { someClass.someFunction() }"
         ),
         Arguments.of(
-            "whenever(someClass.someFunction())",
-            "every { someClass.someFunction() }"
+            "whenever(someClass.someFunction()).doReturn(data)",
+            "every { someClass.someFunction() }.returns(data)"
         ),
         Arguments.of(
             "whenever(someClass.someFunction())",
@@ -59,6 +76,10 @@ class MockingConverterTest {
         Arguments.of(
             "on { \nsomeClass.someFunction(eq(123), eq(date) \n\t\t}",
             "every { someClass.someFunction(123, date) }"
+        ),
+        Arguments.of(
+            testDataMockito1,
+            testDataMockk1
         ),
         Arguments.of(
             TestData1.testFile1Mockito,

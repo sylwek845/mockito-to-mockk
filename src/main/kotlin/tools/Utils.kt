@@ -13,7 +13,7 @@ enum class BracketType(internal val left: Char, internal val right: Char) {
 
     companion object {
         operator fun get(left: Char): BracketType {
-            return BracketType.values().first { it.left == left }
+            return entries.first { it.left == left }
         }
     }
 }

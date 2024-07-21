@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.21"
+    kotlin("jvm") version "2.0.0"
 }
 
 group = "com.sylwek845.mockito_mock"
@@ -12,9 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.sarahbuisson:kotlin-parser:1.5")
     testImplementation(kotlin("test"))
-//    testImplementation("junit:junit:4.13.2")
     val junit5 = "5.9.0"
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junit5}")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:${junit5}")
