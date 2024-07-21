@@ -1,4 +1,4 @@
-package replace
+package migration
 
 import tools.BracketType
 import tools.removeEqFromText

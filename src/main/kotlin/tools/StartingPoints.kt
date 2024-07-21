@@ -1,6 +1,6 @@
 package tools
 
-import replace.ImportsConverter
+import migration.ImportsConverter
 
 internal object StartingPoints {
     val mockingPredicate = listOf(

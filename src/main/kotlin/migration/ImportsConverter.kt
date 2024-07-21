@@ -1,4 +1,4 @@
-package replace
+package migration
 
 object ImportsConverter {
     private val importsToAdd = mutableSetOf("import io.mockk.mockk")
