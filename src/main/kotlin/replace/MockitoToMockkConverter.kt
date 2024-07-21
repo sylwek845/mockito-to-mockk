@@ -14,7 +14,7 @@ class MockitoToMockkConverter {
                 "every { $extractedBlock }"
             }
             val converted2 = mainConverter.convert(converted1, StartingPoints.returnPredicate) { extractedBlock ->
-                " returns $extractedBlock"
+                ".returns($extractedBlock)"
             }
             val converted3 = converted2.replaceHardcoded()
 

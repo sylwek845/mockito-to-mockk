@@ -1,13 +1,15 @@
 <h1>WIP</h1>
 <h1>Mockito to mockk migration tool</h1>
 
+NOTE! Please review your code after migration, this is tool was developed to help with conversion to mockk only.
+
 TODO
-2. Implement argumentCaptor to slot
-3. Add more tests coverages
-4. Add main function which takes path param to file
-5. **Optional** Convert into gradle plugin?-> Release?
-6. Update Readme
-7. Make it public
+
+1. Implement argumentCaptor to slot
+2. Add more tests coverages
+3. Add main function which takes path param to file
+4. **Optional** Convert into gradle plugin?-> Release?
+5. Update Readme
 
 Known Issues
 
