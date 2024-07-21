@@ -8,6 +8,7 @@ class MockitoToMockkConverter {
     private val verifyConverter = VerifyConverter()
     fun convert(clazz: String): String {
         LogKeeper.clear()
+        ImportsConverter.clear()
         return runCatching {
             val converted1 = mainConverter.convert(clazz, StartingPoints.mockingPredicate) { extractedBlock ->
                 ImportsConverter.addImports("io.mockk.every")
