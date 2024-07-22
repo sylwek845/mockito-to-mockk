@@ -101,7 +101,7 @@ class VerifyConverter {
                 }
 
                 else -> {
-                    LogKeeper.logCritical("Failed to convert verify param $item please review missing param")
+                    LogKeeper.logWarning("Failed to convert verify param $item please review missing param")
                     null
                 }
             }

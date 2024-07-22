@@ -29,6 +29,14 @@ internal class ArgumentCaptors {
                 }
             }
         }
+
+        // Replace remaining ones
+        stringsToReplace.forEach { (old, new) ->
+            if (updatedText.contains(old)) {
+                ImportsConverter.addImports("io.mockk.CapturingSlot")
+            }
+            updatedText = updatedText.replace(old, new)
+        }
         return updatedText
     }
 
@@ -43,7 +51,7 @@ internal class ArgumentCaptors {
         var updatedText1 = updatedText
         ImportsConverter.addImports("io.mockk.slot")
         val variableName = updatedText1.variableNameFinder(captorIndex) ?: run {
-            LogKeeper.logCritical("Could not find variable name. Skipping this migration, please check the code.")
+            LogKeeper.logWarning("Could not find variable name. Skipping this migration, please check the code.")
             return null
         }
         // Replace only first argumentCaptor so the search can next one.
@@ -83,7 +91,7 @@ internal class ArgumentCaptors {
     }
 
     private fun replaceToCapture(suffix: String, variableName: String, updatedText: String): String {
-        LogKeeper.logWarning("$variableName.$suffix replaced with .captured")
+        LogKeeper.logWarning("$variableName.$suffix replaced with $variableName.captured")
         return updatedText.replace("$variableName.$suffix", "${variableName}.captured")
     }
 

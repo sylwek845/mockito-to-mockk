@@ -29,6 +29,7 @@ class MockitoToMockkConverter {
         }.onFailure {
             LogKeeper.logError(it.message.orEmpty())
         }.getOrDefault(clazz).also {
+            LogKeeper.logInfo("Success!")
             LogKeeper.print()
         }
     }
