@@ -48,6 +48,9 @@ internal class ArgumentCaptors {
         }
         // Replace only first argumentCaptor so the search can next one.
         stringsToReplace.forEach { (old, new) ->
+            if (updatedText1.contains(old)) {
+                ImportsConverter.addImports("io.mockk.CapturingSlot")
+            }
             updatedText1 = updatedText1.replaceFirst(old, new)
         }
         val captureCode = "${variableName}.capture()"
@@ -100,5 +103,6 @@ internal class ArgumentCaptors {
     private val stringsToReplace = listOf(
         "argumentCaptor<" to "slot<",
         "argumentCaptor(" to "slot(",
+        "KArgumentCaptor" to "CapturingSlot",
     )
 }
