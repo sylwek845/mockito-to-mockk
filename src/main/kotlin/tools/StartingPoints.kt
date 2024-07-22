@@ -29,7 +29,8 @@ internal object StartingPoints {
     )
 
     val argumentCaptorsPredicate = listOf(
-        "= argumentCaptor"
+        "= argumentCaptor" to false,
+        "ArgumentCaptor.forClass(" to true
     )
 }
 

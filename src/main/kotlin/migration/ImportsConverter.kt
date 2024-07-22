@@ -7,6 +7,7 @@ object ImportsConverter {
     }
     fun clear() {
         importsToAdd.clear()
+        importsToAdd.add("import io.mockk.mockk")
     }
 
     fun convert(textToParse: String): String {

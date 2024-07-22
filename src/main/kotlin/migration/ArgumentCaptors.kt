@@ -9,36 +9,58 @@ import tools.variableNameFinder
 internal class ArgumentCaptors {
     fun convert(classText: String): String {
         var updatedText = classText
-        StartingPoints.argumentCaptorsPredicate.forEach { searchPredicate ->
+        StartingPoints.argumentCaptorsPredicate.forEach { (searchPredicate, requiresTypeExtraction) ->
             var doneConverting = false
             while (!doneConverting) {
-                val captorIndex = updatedText.indexOf(searchPredicate)
+                val (type, captorIndex) = if (requiresTypeExtraction) {
+                    updatedText.extractTypeCodeAndIndex() ?: ("" to -1)
+                } else {
+                    null to updatedText.indexOf(searchPredicate)
+                }
                 if (captorIndex != -1) {
-                    /*
-                     * 1.Find index of captor
-                     * 2.Get variable name
-                     * 3.Replace the call to captor declaration
-                     * 4.Replace .capture
-                     * 5.Replace getting value from captor (log potential warnings)
-                     */
-                    ImportsConverter.addImports("io.mockk.slot")
-                    val variableName = updatedText.variableNameFinder(captorIndex) ?: run {
-                        LogKeeper.logCritical("Could not find variable name. Skipping this migration, please check the code.")
-                        return@forEach
+                    if (type != null) {
+                        updatedText = updatedText.replace("ArgumentCaptor.forClass($type::class.java)", "slot<$type>()")
                     }
-                    // Replace only first argumentCaptor so the search can next one.
-                    stringsToReplace.forEach { (old, new) ->
-                        updatedText = updatedText.replaceFirst(old, new)
+                    convertRemaining(updatedText, captorIndex)?.let {
+                        updatedText = it
                     }
-                    val captureCode = "${variableName}.capture()"
-                    updatedText = updatedText.replaceFirst(captureCode, "capture($variableName)")
-                    updatedText = updatedText.replaceCapturedValueCall(variableName)
                 } else {
                     doneConverting = true
                 }
             }
         }
         return updatedText
+    }
+
+    private fun convertRemaining(updatedText: String, captorIndex: Int): String? {
+        /*
+                     * 1.Find index of captor
+                     * 2.Get variable name
+                     * 3.Replace the call to captor declaration
+                     * 4.Replace .capture
+                     * 5.Replace getting value from captor (log potential warnings)
+                     */
+        var updatedText1 = updatedText
+        ImportsConverter.addImports("io.mockk.slot")
+        val variableName = updatedText1.variableNameFinder(captorIndex) ?: run {
+            LogKeeper.logCritical("Could not find variable name. Skipping this migration, please check the code.")
+            return null
+        }
+        // Replace only first argumentCaptor so the search can next one.
+        stringsToReplace.forEach { (old, new) ->
+            updatedText1 = updatedText1.replaceFirst(old, new)
+        }
+        val captureCode = "${variableName}.capture()"
+        updatedText1 = updatedText1.replaceFirst(captureCode, "capture($variableName)")
+        updatedText1 = updatedText1.replaceCapturedValueCall(variableName)
+        return updatedText1
+    }
+
+    private fun String.extractTypeCodeAndIndex(): Pair<String, Int>? {
+        val indexOf = indexOf("ArgumentCaptor.forClass(")
+        if (indexOf == -1) return null
+        val type = substringBetweenBraces(startAfterIndex = indexOf)?.split(":")?.firstOrNull() ?: return null
+        return type to indexOf(type, startIndex = indexOf)
     }
 
     /*

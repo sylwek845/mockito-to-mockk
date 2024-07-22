@@ -80,8 +80,8 @@ class SampleClassTest {
     """.trimIndent()
 
     @Language("kotlin")
-    val testDataExpected1 = """
-       import io.mockk.verify
+    val testDataExpected1 = """import io.mockk.slot
+import io.mockk.verify
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -114,7 +114,7 @@ class SampleClassTest {
         val mockDependency2 = mockk(relaxed = true,Dependency2::class.java)
 
         // Define behavior for mocks
-        every { mockDependency1.someMethod(anyString()) } returns 42
+        every { mockDependency1.someMethod(anyString()) }.returns(42)
 
         // Create an instance of the class under test
         val sampleClass = SampleClass(mockDependency1, mockDependency2)
@@ -135,7 +135,7 @@ class SampleClassTest {
         val mockDependency2 = mockk(relaxed = true,Dependency2::class.java)
 
         // Define behavior for mocks
-        every { mockDependency1.someMethod(anyString()) } returns 42
+        every { mockDependency1.someMethod(anyString()) }.returns(42)
 
         // Create an instance of the class under test
         val sampleClass = SampleClass(mockDependency1, mockDependency2)
@@ -148,7 +148,7 @@ class SampleClassTest {
         verify { mockDependency2.anotherMethod(42) }
 
         // Additional verification using ArgumentCaptor
-        val captor = ArgumentCaptor.forClass(Int::class.java)
+        val captor = slot<Int>()
         verify { mockDependency2.anotherMethod(capture(captor)) }
         assert(captor.value == 42)
     }
