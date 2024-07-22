@@ -1,4 +1,4 @@
-package replace
+package migration
 
 object ImportsConverter {
     private val importsToAdd = mutableSetOf("import io.mockk.mockk")
@@ -7,6 +7,7 @@ object ImportsConverter {
     }
     fun clear() {
         importsToAdd.clear()
+        importsToAdd.add("import io.mockk.mockk")
     }
 
     fun convert(textToParse: String): String {

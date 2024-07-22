@@ -35,7 +35,7 @@ internal class UtilsKtTest {
         input: String,
         output: Pair<IntRange, String>,
     ) {
-        val actual = input.findEndOfFunctionOrVariable(startAfterIndex = output.first.first)
+        val actual = input.findEndOfFunctionOrVariable()
         assertEquals(
             output.second.ignoreSpaces(),
             actual?.second.ignoreSpaces(),
@@ -45,6 +45,20 @@ internal class UtilsKtTest {
             actual?.first,
         )
     }
+
+    @ParameterizedTest(name = "#{index}: input={0}, output={1}")
+    @MethodSource("argsVariableNameFinder")
+    fun `findVariableName test`(
+        input: Pair<String, Int>,
+        output: String,
+    ) {
+        val actual = input.first.variableNameFinder(startIndex = input.second)
+        assertEquals(
+            output,
+            actual,
+        )
+    }
+
 
     private fun argsBracketTest() = listOf(
         Arguments.of("something(mock)", "mock", 0, BracketType.Parentheses, 0),
@@ -102,5 +116,20 @@ internal class UtilsKtTest {
         Arguments.of("verify(someClass).testVariable\n\n", IntRange(18, 31) to "testVariable"),
         Arguments.of(multiLineFVInput, IntRange(18, 52) to "testFunction(someParam,someParam)"),
         Arguments.of(example1Mockito, IntRange(example1Mockito.indexOf(".") + 1, 35) to "testNewLine()"),
+    )
+
+    private fun argsVariableNameFinder() = listOf(
+        Arguments.of(
+            "val testName = argumentCaptor()" to 31, "testName",
+        ),
+        Arguments.of(
+            "val testName1\n = argumentCaptor()" to 33, "testName1",
+        ),
+        Arguments.of(
+            "var testName2 = argumentCaptor()" to 32, "testName2",
+        ),
+        Arguments.of(
+            "var testName3 = argumentCaptor()\nvar testName4 = someFunction()\nval testName5" to 51, "testName4",
+        )
     )
 }

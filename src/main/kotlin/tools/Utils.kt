@@ -84,6 +84,16 @@ fun String.findEndOfFunctionOrVariable(
     return null
 }
 
+fun String.variableNameFinder(
+    startIndex: Int = length - 1,
+): String? {
+    val trimmedString = substring(startIndex = 0, endIndex = startIndex)
+    val name = variableRegex.findAll(trimmedString).last()
+    return name.groups[1]?.value
+}
+
+private val variableRegex = Regex("(?:var|val)\\s+(\\w+)")
+
 private fun Char.emptyChar(): Boolean {
     return this == ' '
 }

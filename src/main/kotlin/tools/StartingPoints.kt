@@ -1,6 +1,6 @@
 package tools
 
-import replace.ImportsConverter
+import migration.ImportsConverter
 
 internal object StartingPoints {
     val mockingPredicate = listOf(
@@ -14,7 +14,6 @@ internal object StartingPoints {
         ".thenReturn(",
     )
 
-
     val justToReplace = mapOf(
         "doReturn" to ReplaceOnlyData("returns") {},
         "mock(" to ReplaceOnlyData("mockk(relaxed = true,") {},
@@ -27,6 +26,11 @@ internal object StartingPoints {
         "@Spy" to ReplaceOnlyData("@SpyK") {},
         "Mockito.reset(" to ReplaceOnlyData("clearMocks(")
         { ImportsConverter.addImports("io.mockk.clearMocks") },
+    )
+
+    val argumentCaptorsPredicate = listOf(
+        "= argumentCaptor" to false,
+        "ArgumentCaptor.forClass(" to true
     )
 }
 

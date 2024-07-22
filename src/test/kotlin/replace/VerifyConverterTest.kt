@@ -1,5 +1,6 @@
 package replace
 
+import migration.VerifyConverter
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance
