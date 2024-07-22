@@ -35,7 +35,7 @@ internal class UtilsKtTest {
         input: String,
         output: Pair<IntRange, String>,
     ) {
-        val actual = input.findEndOfFunctionOrVariable()
+        val actual = input.findEndOfFunctionOrVariable(input.indexOf(".") + 1)
         assertEquals(
             output.second.ignoreSpaces(),
             actual?.second.ignoreSpaces(),
