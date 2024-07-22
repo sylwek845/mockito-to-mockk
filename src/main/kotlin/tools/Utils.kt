@@ -53,6 +53,37 @@ fun String.substringBetweenBraces(
     return slicedString.substring(leftIndex + 1, rightIndex)
 }
 
+fun String.indexOfMatchingBraces(
+    bracketCount: Int = 0,
+    startAfterIndex: Int = 0,
+    bracketType: BracketType = BracketType.Parentheses,
+): Int? {
+    val slicedString =
+        if (startAfterIndex == 0) this else substring(startAfterIndex)
+
+    var leftCount = 0
+    var rightCount = 0
+    var rightIndex = 0
+
+    slicedString.toCharArray().forEachIndexed { index, c ->
+        when (c) {
+            bracketType.left -> {
+                leftCount++
+            }
+
+            bracketType.right -> {
+                rightCount++
+                if (leftCount == rightCount + bracketCount) {
+                    rightIndex = index
+                    return rightIndex
+                }
+            }
+        }
+    }
+    if (bracketCount + 1 > leftCount || leftCount != rightCount) return null
+    return rightIndex
+}
+
 fun String.findEndOfFunctionOrVariable(
     startAfterIndex: Int = 0,
 ): Pair<Int, String>? {

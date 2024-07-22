@@ -57,7 +57,7 @@ internal class VerifyConverterTest {
         Arguments.of("verify(mock, atLeastOnce()).someMethod(58)", "verify(atLeast = 1) { mock.someMethod(58) }"),
         Arguments.of("verify(mock, atLeast(2)).someMethod(58)", "verify(atLeast = 2) { mock.someMethod(58) }"),
         Arguments.of("verify(mock, atMost(3)).someMethod(58)", "verify(atMost = 3) { mock.someMethod(58) }"),
-        Arguments.of("verify(mock, atMost(3)).someMethod(58)", "verify(atMost = 3) { mock.someMethod(58) }"),
+        Arguments.of("verify(eq(mock), atMost(3)).someMethod(58)", "verify(atMost = 3) { mock.someMethod(58) }"),
         Arguments.of("verifyNoMoreInteractions(mock)", "confirmVerified(mock)"),
         Arguments.of("verifyNoMoreInteractions(mock, mock2)", "confirmVerified(mock, mock2)"),
         Arguments.of("verifyNoInteractions(mock)", "verify { mock wasNot Called }"),

@@ -1,10 +1,7 @@
 package migration
 
 import logs.LogKeeper
-import tools.BracketType
-import tools.StartingPoints
-import tools.substringBetweenBraces
-import tools.variableNameFinder
+import tools.*
 
 internal class ArgumentCaptors {
     fun convert(classText: String): String {
@@ -30,12 +27,37 @@ internal class ArgumentCaptors {
             }
         }
 
-        // Replace remaining ones
-        stringsToReplace.forEach { (old, new) ->
-            if (updatedText.contains(old)) {
-                ImportsConverter.addImports("io.mockk.CapturingSlot")
+        return updatedText.migrateCaptorsWithoutVariable()
+    }
+
+    private fun String.migrateCaptorsWithoutVariable(): String {
+        var updatedText = this
+        while (updatedText.contains(argumentCaptorRegex)) {
+            val range = argumentCaptorRegex.find(updatedText)?.range
+            if (range == null) {
+                LogKeeper.logWarning("Failed to convert ${argumentCaptorRegex.pattern}")
+                return this
             }
-            updatedText = updatedText.replace(old, new)
+            val endIndex = updatedText.indexOfMatchingBraces(
+                startAfterIndex = range.endInclusive - 1,
+                bracketType = BracketType.Braces
+            )
+            if (endIndex == null) {
+                LogKeeper.logWarning("Failed to find end of function. Skipping")
+                return this
+            }
+            val oldRangeToReplace = IntRange(range.start, endIndex + range.endInclusive - 1)
+            val extractedCode = updatedText.substring(oldRangeToReplace)
+            if (extractedCode.isEmpty()) {
+                LogKeeper.logWarning("Failed to extract code after index:${range.last}")
+                return this
+            }
+            var updatedExtractedCode: String = extractedCode
+            blockStringToReplace.forEach { (old, new) ->
+                updatedExtractedCode = updatedExtractedCode.replace(old, new)
+            }
+            updatedExtractedCode = updatedExtractedCode.replace("argumentCaptor<", "slot<")
+            updatedText = updatedText.replaceRange(oldRangeToReplace, updatedExtractedCode)
         }
         return updatedText
     }
@@ -80,13 +102,11 @@ internal class ArgumentCaptors {
      */
     private fun String.replaceCapturedValueCall(variableName: String): String {
         var updatedText = this
-//        while (getContainsList(variableName).anyMatch(updatedText::contains)) {
         updatedText = replaceToCapture("firstValue", variableName, updatedText)
         updatedText = replaceToCapture("secondValue", variableName, updatedText)
         updatedText = replaceToCapture("thirdValue", variableName, updatedText)
         updatedText = replaceToCapture("lastValue", variableName, updatedText)
         updatedText = updatedText.extractAllValuesStatement(variableName)
-//        }
         return updatedText
     }
 
@@ -113,4 +133,15 @@ internal class ArgumentCaptors {
         "argumentCaptor(" to "slot(",
         "KArgumentCaptor" to "CapturingSlot",
     )
+
+    private val blockStringToReplace = listOf(
+        "firstValue" to "captured",
+        "secondValue" to "captured",
+        "thirdValue" to "captured",
+        "lastValue" to "captured",
+        "capture()" to "capture(this)",
+        "this.capture()" to "capture(this)",
+    )
+
+    private val argumentCaptorRegex = Regex("argumentCaptor<.*>().* \\{")
 }

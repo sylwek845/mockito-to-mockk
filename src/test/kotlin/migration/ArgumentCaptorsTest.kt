@@ -25,6 +25,7 @@ class ArgumentCaptorsTest {
         Arguments.of(input2, expected2),
         Arguments.of(input3, expected3),
         Arguments.of(input4, expected4),
+        Arguments.of(input5, expected5),
     )
 
     private val input1 = """
@@ -101,5 +102,22 @@ class ArgumentCaptorsTest {
         someClass.test2(capture(test))
         
         isEqualTo(test.captured, someData())
+    """.trimIndent()
+    private val input5 = """
+        argumentCaptor<Test>().apply {
+            someClass.test1()
+            someClass.test(capture())
+            
+            isEqualTo(firstValue, someData())
+        }
+    """.trimIndent()
+
+    private val expected5 = """
+        slot<Test>().apply {
+            someClass.test1()
+            someClass.test(capture(this))
+            
+            isEqualTo(captured, someData())
+        }
     """.trimIndent()
 }
