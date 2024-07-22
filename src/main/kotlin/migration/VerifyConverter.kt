@@ -3,6 +3,7 @@ package migration
 import logs.LogKeeper
 import tools.BracketType
 import tools.findEndOfFunctionOrVariable
+import tools.removeEqFromText
 import tools.substringBetweenBraces
 
 class VerifyConverter {
@@ -42,7 +43,7 @@ class VerifyConverter {
         val extracted =
             substringBetweenBraces(startAfterIndex = startIndex, bracketType = bracket) ?: return null
         val extractedAll = extracted.split(",")
-        val extractedObjectName = extractedAll.first()
+        val extractedObjectName = removeEqFromText(extractedAll.first())
         val params = extractedAll.drop(1)
         val endBlockIndex = indexOf(startIndex = startIndex, char = '.') + 1
         val extractedStatement = findEndOfFunctionOrVariable(endBlockIndex) ?: return null
