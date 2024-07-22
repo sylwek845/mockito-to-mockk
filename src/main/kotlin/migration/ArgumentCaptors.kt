@@ -91,7 +91,7 @@ internal class ArgumentCaptors {
     }
 
     private fun replaceToCapture(suffix: String, variableName: String, updatedText: String): String {
-        LogKeeper.logWarning("$variableName.$suffix replaced with .captured")
+        LogKeeper.logWarning("$variableName.$suffix replaced with $variableName.captured")
         return updatedText.replace("$variableName.$suffix", "${variableName}.captured")
     }
 

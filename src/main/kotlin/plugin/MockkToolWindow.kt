@@ -10,7 +10,7 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
 import logs.LogKeeper
-import replace.MockitoToMockkConverter
+import migration.MockitoToMockkConverter
 import tools.getSelectedDocumentOrNull
 import tools.saveDocument
 import java.awt.BorderLayout
@@ -54,7 +54,7 @@ internal class MockkToolWindow : ToolWindowFactory, DumbAware {
 
         private fun showMigrationLog() {
             LogKeeper.logs.forEach { log ->
-                consoleView.print(log.message, log.logType.logType)
+                consoleView.print("${log.message}\n", log.logType.logType)
             }
         }
 
