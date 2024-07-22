@@ -72,7 +72,7 @@ fun String.findEndOfFunctionOrVariable(
             !c.isLetterOrDigit() && c.isParentheses() -> {
                 val bracketStartingIndex = index + startAfterIndex
                 val extractedCode = substringBetweenBraces(startAfterIndex = bracketStartingIndex) ?: run {
-                    LogKeeper.logCritical("Did not find end of ( near index $bracketStartingIndex")
+                    LogKeeper.logWarning("Did not find end of ( near index $bracketStartingIndex")
                     return null
                 }
                 val fullCodeLen = extractedCode.length + 2 + index + startAfterIndex

@@ -1,7 +1,10 @@
 package logs
 
+import com.intellij.execution.ui.ConsoleViewContentType
+
 object LogKeeper {
     private val logList = mutableListOf<Log>()
+    val logs: List<Log> get() = logList
 
     fun clear() {
         logList.clear()
@@ -19,10 +22,6 @@ object LogKeeper {
         logList.add(Log(message, LogType.Warning))
     }
 
-    fun logCritical(message: String) {
-        logList.add(Log(message, LogType.Critical))
-    }
-
     fun getLogString(): String {
         return logList.reversed().joinToString(separator = "\n") { log ->
             "**${log.logType}** -> $log"
@@ -34,8 +33,10 @@ object LogKeeper {
     }
 }
 
-enum class LogType {
-    Warning, Error, Info, Critical
+enum class LogType(internal val logType: ConsoleViewContentType) {
+    Warning(logType = ConsoleViewContentType.LOG_WARNING_OUTPUT),
+    Error(logType = ConsoleViewContentType.ERROR_OUTPUT),
+    Info(logType = ConsoleViewContentType.LOG_INFO_OUTPUT),
 }
 
 data class Log(
