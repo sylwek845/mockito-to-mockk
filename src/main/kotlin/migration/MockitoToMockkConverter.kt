@@ -6,6 +6,7 @@ import tools.StartingPoints
 class MockitoToMockkConverter {
     private val mainConverter = MainConverter()
     private val verifyConverter = VerifyConverter()
+    private val argumentCaptors = ArgumentCaptors()
     fun convert(clazz: String): String {
         LogKeeper.clear()
         ImportsConverter.clear()
@@ -21,7 +22,9 @@ class MockitoToMockkConverter {
 
             val verified = verifyConverter.convert(converted3)
 
-            val converted4 = ImportsConverter.convert(verified)
+            val slot = argumentCaptors.convert(verified)
+
+            val converted4 = ImportsConverter.convert(slot)
             converted4
         }.onFailure {
             LogKeeper.logError(it.message.orEmpty())

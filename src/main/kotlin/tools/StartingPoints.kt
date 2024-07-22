@@ -14,7 +14,6 @@ internal object StartingPoints {
         ".thenReturn(",
     )
 
-
     val justToReplace = mapOf(
         "doReturn" to ReplaceOnlyData("returns") {},
         "mock(" to ReplaceOnlyData("mockk(relaxed = true,") {},
@@ -27,6 +26,10 @@ internal object StartingPoints {
         "@Spy" to ReplaceOnlyData("@SpyK") {},
         "Mockito.reset(" to ReplaceOnlyData("clearMocks(")
         { ImportsConverter.addImports("io.mockk.clearMocks") },
+    )
+
+    val argumentCaptorsPredicate = listOf(
+        "= argumentCaptor"
     )
 }
 
