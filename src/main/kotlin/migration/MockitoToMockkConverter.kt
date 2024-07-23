@@ -11,21 +11,32 @@ class MockitoToMockkConverter {
         LogKeeper.clear()
         ImportsConverter.clear()
         return runCatching {
-            val converted1 = mainConverter.convert(clazz, StartingPoints.mockingPredicate) { extractedBlock ->
-                ImportsConverter.addImports("io.mockk.every")
-                "every { $extractedBlock }"
-            }
-            val converted2 = mainConverter.convert(converted1, StartingPoints.returnPredicate) { extractedBlock ->
-                ".returns($extractedBlock)"
-            }
-            val converted3 = converted2.replaceHardcoded()
+            val mockingConverted =
+                mainConverter.convert(clazz, StartingPoints.mockingPredicate) { extractedBlock, isSuspended ->
+                    ImportsConverter.addImports("io.mockk.every")
+                    if (isSuspended) {
+                        "coEvery { $extractedBlock }"
+                    } else {
+                        "every { $extractedBlock }"
+                    }
+                }
+            val returns =
+                mainConverter.convert(mockingConverted, StartingPoints.returnPredicate) { extractedBlock, _ ->
+                    val prefix = if (extractedBlock.contains(",")) {
+                        ".returnsMany"
+                    } else {
+                        ".returns"
+                    }
+                    "$prefix($extractedBlock)" // We can;t use infix since some mockito code has \n in between which causes the infix to fail.
+                }
+            val hardcoded = returns.replaceHardcoded()
 
-            val verified = verifyConverter.convert(converted3)
+            val verified = verifyConverter.convert(hardcoded)
 
             val slot = argumentCaptors.convert(verified)
 
-            val converted4 = ImportsConverter.convert(slot)
-            converted4
+            val imports = ImportsConverter.convert(slot)
+            imports
         }.onFailure {
             LogKeeper.logError(it.message.orEmpty())
         }.getOrDefault(clazz).also {
@@ -37,8 +48,11 @@ class MockitoToMockkConverter {
     private fun String.replaceHardcoded(): String {
         var updatedClass = this
         StartingPoints.justToReplace.forEach { (old, data) ->
+            val addImport = updatedClass.contains(old)
             updatedClass = updatedClass.replace(old, data.replaceWith)
-            data.performAdditionalAction.invoke()
+            if (addImport) {
+                data.performAdditionalAction.invoke()
+            }
         }
         return updatedClass
     }

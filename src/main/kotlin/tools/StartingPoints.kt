@@ -5,6 +5,8 @@ import migration.ImportsConverter
 internal object StartingPoints {
     val mockingPredicate = listOf(
         "whenever(",
+        "wheneverBlocking(",
+        "wheneverBlocking {",
         "on {",
         "on \n{",
         "`when`(",
@@ -16,14 +18,19 @@ internal object StartingPoints {
 
     val justToReplace = mapOf(
         "doReturn" to ReplaceOnlyData("returns") {},
+        "doAnswer" to ReplaceOnlyData("answers") {},
+        "doThrow" to ReplaceOnlyData("throws") {},
         "mock(" to ReplaceOnlyData("mockk(relaxed = true,") {},
         "mock<" to ReplaceOnlyData("mockk<") {},
         "= mock {" to ReplaceOnlyData("= mockk {") {},
         "mock {" to ReplaceOnlyData("mockk {") {},
         "spy {" to ReplaceOnlyData("spyK {") {},
-        "spy(" to ReplaceOnlyData("= spyK(") {},
-        "@Mock" to ReplaceOnlyData("@Mockk") {},
-        "@Spy" to ReplaceOnlyData("@SpyK") {},
+        ".stub {" to ReplaceOnlyData(".let {") {},
+        "onBlocking" to ReplaceOnlyData("coEvery") {},
+        "spy(" to ReplaceOnlyData("spyk(") {},
+        "@Mock" to ReplaceOnlyData("@MockK") { ImportsConverter.addImports("io.mockk.impl.annotations.MockK") },
+        "@Spy" to ReplaceOnlyData("@SpyK") { ImportsConverter.addImports("io.mockk.impl.annotations.SpyK") },
+        "Mockito." to ReplaceOnlyData("") {},
         "Mockito.reset(" to ReplaceOnlyData("clearMocks(")
         { ImportsConverter.addImports("io.mockk.clearMocks") },
     )

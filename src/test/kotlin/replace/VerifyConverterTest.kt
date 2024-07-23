@@ -34,6 +34,8 @@ internal class VerifyConverterTest {
         verify(mock1).testNewLine2(321421,mock())
         verify(mock2).testNewLine5<String>(321421,mock<Long>())
         verify(mock3).testNewLine4<String>(321421,any<Long>())
+        verify(mock4).testNewLine5
+        someOtherFunction.verify(1)
     """.trimIndent()
 
     @Language("kotlin")
@@ -47,6 +49,8 @@ internal class VerifyConverterTest {
         verify { mock1.testNewLine2(321421,mock()) }
         verify { mock2.testNewLine5<String>(321421,mock<Long>()) }
         verify { mock3.testNewLine4<String>(321421,any<Long>()) }
+        verify { mock4.testNewLine5 }
+        someOtherFunction.verify(1)
     """.trimIndent()
 
     private fun args() = listOf(
@@ -56,7 +60,10 @@ internal class VerifyConverterTest {
         Arguments.of("verify(mock, never()).someMethod(58)", "verify(exactly = 0) { mock.someMethod(58) }"),
         Arguments.of("verify(mock, atLeastOnce()).someMethod(58)", "verify(atLeast = 1) { mock.someMethod(58) }"),
         Arguments.of("verify(mock, atLeast(2)).someMethod(58)", "verify(atLeast = 2) { mock.someMethod(58) }"),
-        Arguments.of("verify(mock, atMost(3)).someMethod(58)", "verify(atMost = 3) { mock.someMethod(58) }"),
+        Arguments.of(
+            "doSuspendableAnswer(mock, atMost(3)).someMethod(58)",
+            "coVerify(atMost = 3) { mock.someMethod(58) }"
+        ),
         Arguments.of("verify(eq(mock), atMost(3)).someMethod(58)", "verify(atMost = 3) { mock.someMethod(58) }"),
         Arguments.of("verifyNoMoreInteractions(mock)", "confirmVerified(mock)"),
         Arguments.of("verifyNoMoreInteractions(mock, mock2)", "confirmVerified(mock, mock2)"),

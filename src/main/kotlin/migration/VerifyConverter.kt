@@ -1,44 +1,57 @@
 package migration
 
 import logs.LogKeeper
-import tools.BracketType
-import tools.findEndOfFunctionOrVariable
-import tools.removeEqFromText
-import tools.substringBetweenBraces
+import tools.*
 
 class VerifyConverter {
     private val mainConverter = MainConverter()
     fun convert(textToConvert: String): String {
         val updatedText = textToConvert.parseNoInteractions().parseNoMoreInteractions()
         val updatedText2 = parseVerify(updatedText)
-        val fixedVerifies = updatedText2.replace(FAKE_VERIFY, PREDICATE).replace(EMPTY_VERIFY_PARAMS, NO_VERIFY_PARAMS)
+        val fixedVerifies = updatedText2
+            .replace(FAKE_VERIFY, PREDICATE)
+            .replace(FAKE_CO_VERIFY, CO_VERIFY)
+            .replace(EMPTY_VERIFY_PARAMS, NO_VERIFY_PARAMS)
         return fixedVerifies
     }
 
     private fun parseVerify(textToConvert: String): String {
         var updatedText = textToConvert
-        var doneConverting = false
-        while (!doneConverting) {
-            val extracted = updatedText.extractVerifyData()
-            if (extracted != null) {
-                val verifyParams = extracted.remainingVerifyParams.prepareVerifyParamsForMockk()
-                val toReplace = "$FAKE_VERIFY$verifyParams) { ${extracted.extractedVerify.trim()} }"
-                ImportsConverter.addImports("io.mockk.verify")
-                val currentText = updatedText.replaceRange(extracted.rangeOfOriginalCode, toReplace)
-                if (currentText == updatedText) {
+        predicates.forEach { predicate ->
+            var doneConverting = false
+            while (!doneConverting) {
+                val extracted = updatedText.extractVerifyData(predicate)
+                if (extracted != null) {
+                    val isSuspended = predicate.isSuspended
+                    val prefix = if (isSuspended) {
+                        ImportsConverter.addImports("io.mockk.coVerify")
+                        FAKE_CO_VERIFY
+                    } else {
+                        ImportsConverter.addImports("io.mockk.verify")
+                        FAKE_VERIFY
+                    }
+                    val verifyParams = extracted.remainingVerifyParams.prepareVerifyParamsForMockk()
+                    val toReplace = "$prefix$verifyParams) { ${extracted.extractedVerify.trim()} }"
+                    val currentText = updatedText.replaceRange(extracted.rangeOfOriginalCode, toReplace)
+                    if (currentText == updatedText) {
+                        doneConverting = true
+                    }
+                    updatedText = currentText
+                } else {
                     doneConverting = true
                 }
-                updatedText = currentText
-            } else {
-                doneConverting = true
             }
         }
         return updatedText
     }
 
-    private fun String.extractVerifyData(): VerifyData? {
-        val startIndex = indexOf(PREDICATE)
+    private fun String.extractVerifyData(predicate: String): VerifyData? {
+        val startIndex = indexOf(predicate)
         if (startIndex == -1) return null
+        val previousChar = getOrNull(startIndex - 1)
+        if (previousChar == '.') { // Ignore .verify, this most likely does not belong to mockito
+            return null
+        }
         val bracket = BracketType.Parentheses
         val extracted =
             substringBetweenBraces(startAfterIndex = startIndex, bracketType = bracket) ?: return null
@@ -48,7 +61,12 @@ class VerifyConverter {
         val endBlockIndex = indexOf(startIndex = startIndex, char = '.') + 1
         val extractedStatement = findEndOfFunctionOrVariable(endBlockIndex) ?: return null
         val lastIndex = extractedStatement.first
-        val wholeBlock = "${extractedObjectName}.${extractedStatement.second}"
+        val extractedBlock = if (extractedStatement.second.last() == ')') {
+            extractedStatement.second
+        } else {
+            "${extractedStatement.second}\n"
+        }
+        val wholeBlock = "${extractedObjectName}.$extractedBlock"
         val range = IntRange(startIndex, lastIndex - 1)
         return VerifyData(
             rangeOfOriginalCode = range,
@@ -58,14 +76,14 @@ class VerifyConverter {
     }
 
     private fun String.parseNoMoreInteractions(): String {
-        return mainConverter.convert(this, listOf("verifyNoMoreInteractions(")) { block ->
+        return mainConverter.convert(this, listOf("verifyNoMoreInteractions(")) { block, _ ->
             ImportsConverter.addImports("io.mockk.confirmVerified")
             "confirmVerified($block)"
         }
     }
 
     private fun String.parseNoInteractions(): String {
-        return mainConverter.convert(this, listOf("verifyNoInteractions(")) { block ->
+        return mainConverter.convert(this, listOf("verifyNoInteractions(")) { block, _ ->
             ImportsConverter.addImports("io.mockk.Called")
             val eachStatement = block.split(",")
             eachStatement.map { eachBlock ->
@@ -118,10 +136,18 @@ class VerifyConverter {
         val remainingVerifyParams: List<String>,
     )
 
+    private val predicates = listOf(
+        PREDICATE,
+        "doSuspendableAnswer"
+    )
+
     private companion object {
         const val PREDICATE = "verify("
+        const val CO_VERIFY = "coVerify("
         const val FAKE_VERIFY =
             "ver@ify(" // This is required to avoid infinite loop, since the parser is looking for verify(
+        const val FAKE_CO_VERIFY =
+            "coVer@ify(" // This is required to avoid infinite loop, since the parser is looking for verify(
         const val EMPTY_VERIFY_PARAMS = "verify()"
         const val NO_VERIFY_PARAMS = "verify"
         const val TIMES_PREFIX = "times("

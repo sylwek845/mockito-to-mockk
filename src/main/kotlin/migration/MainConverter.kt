@@ -1,19 +1,21 @@
 package migration
 
 import tools.BracketType
+import tools.isSuspended
 import tools.removeEqFromText
 import tools.substringBetweenBraces
 
 class MainConverter {
 
-    fun convert(classText: String, predicate: List<String>, block: (String) -> String): String {
+    fun convert(classText: String, predicate: List<String>, block: (String, Boolean) -> String): String {
         var updatedText = classText
         predicate.forEach { searchPredicate ->
             var doneConverting = false
             while (!doneConverting) {
                 val extracted = updatedText.extractCode(searchPredicate)
                 if (extracted != null) {
-                    val toReplace = block.invoke(extracted.extractedCode.trim())
+                    val isCoroutine = searchPredicate.isSuspended
+                    val toReplace = block.invoke(extracted.extractedCode.trim(), isCoroutine)
                     val currentText = updatedText.replaceRange(extracted.rangeOfOriginalCode, toReplace)
                     if (currentText == updatedText) {
                         doneConverting = true
@@ -29,7 +31,8 @@ class MainConverter {
 
     private fun String.extractCode(predicate: String): ExtractedCodeData? {
         val startIndex = indexOf(predicate)
-        if (startIndex == -1) return null
+        val previousChar = getOrElse(startIndex - 1) { ' ' }
+        if (startIndex == -1 || previousChar.isLetterOrDigit()) return null
         val bracket = BracketType[predicate.last()]
         val extractedCode = substringBetweenBraces(startAfterIndex = startIndex, bracketType = bracket) ?: return null
         val originalCodeLen = predicate.length + extractedCode.length
