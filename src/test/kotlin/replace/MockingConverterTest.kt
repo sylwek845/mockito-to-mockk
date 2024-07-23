@@ -66,8 +66,45 @@ class MockingConverterTest {
             "every { someClass.someFunction(123, date) }"
         ),
         Arguments.of(
+            "whenever(someClass.someFunction(eq(123), eq(date))).doAnswer(mock)",
+            "every { someClass.someFunction(123, date) }.answers(mock)"
+        ),
+        Arguments.of(
+            "whenever(someClass.someFunction(eq(123), eq(date))) doAnswer mock",
+            "every { someClass.someFunction(123, date) } answers mock"
+        ),
+        Arguments.of(
+            "whenever(someClass.someFunction(eq(123), eq(date))).doThrow(throwable)",
+            "every { someClass.someFunction(123, date) }.throws(throwable)"
+        ),
+
+        Arguments.of(
+            "whenever(someClass.someFunction(eq(123), eq(date))) doThrow throwable",
+            "every { someClass.someFunction(123, date) } throws throwable"
+        ),
+        Arguments.of(
+            "whenever(someClass.someFunction(eq(123), eq(date))) doThrow (throwable)",
+            "every { someClass.someFunction(123, date) } throws (throwable)"
+        ),
+        Arguments.of(
+            "wheneverBlocking(someClass.someFunction(eq(123), eq(date)))",
+            "coEvery { someClass.someFunction(123, date) }"
+        ),
+        Arguments.of(
+            "wheneverBlocking { someClass.someFunction(eq(123), eq(date)) }",
+            "coEvery { someClass.someFunction(123, date) }"
+        ),
+        Arguments.of(
             "on { someClass.someFunction(eq(123), eq(date) }",
             "every { someClass.someFunction(123, date) }"
+        ),
+        Arguments.of(
+            "on { someClass.someFunction(eq(123), eq(date) }\nlocation {}",
+            "every { someClass.someFunction(123, date) }\nlocation {}"
+        ),
+        Arguments.of(
+            "on { someClass.someFunction(eq(123), eq(date) }.doReturn(1,2,3)",
+            "every { someClass.someFunction(123, date) }.returnsMany(1,2,3)"
         ),
         Arguments.of(
             "on { \nsomeClass.someFunction(eq(123), eq(date) \n\t\t}",

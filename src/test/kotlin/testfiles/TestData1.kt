@@ -68,7 +68,7 @@ class SampleClassTest {
         sampleClass.doSomething()
 
         // Verify interactions
-        verify(mockDependency1).someMethod("input")
+        Mockito.verify(mockDependency1).someMethod("input")
         verify(mockDependency2).anotherMethod(42)
 
         // Additional verification using ArgumentCaptor
@@ -82,7 +82,6 @@ class SampleClassTest {
     @Language("kotlin")
     val testDataExpected1 = """import io.mockk.slot
 import io.mockk.verify
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
     import org.junit.jupiter.api.Test

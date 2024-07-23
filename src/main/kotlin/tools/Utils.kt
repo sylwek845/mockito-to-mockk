@@ -88,6 +88,7 @@ fun String.findEndOfFunctionOrVariable(
     startAfterIndex: Int = 0,
 ): Pair<Int, String>? {
     val slicedString = drop(startAfterIndex)
+    var previousChar = ' '
     slicedString.forEachIndexed { index, c ->
         when {
             (slicedString.length - 1 == index) -> {
@@ -110,7 +111,13 @@ fun String.findEndOfFunctionOrVariable(
                 val code = substring(startIndex = startAfterIndex, endIndex = fullCodeLen).trim()
                 return fullCodeLen to code
             }
+
+            !c.isLetterOrDigit() && !c.isParentheses() && c.isNewLine() && previousChar.isLetterOrDigit() -> {
+                val code = substring(startIndex = startAfterIndex, endIndex = startAfterIndex + index + 1)
+                return startAfterIndex + index to code
+            }
         }
+        previousChar = c
     }
     return null
 }
@@ -132,3 +139,9 @@ private fun Char.emptyChar(): Boolean {
 private fun Char.isParentheses(): Boolean {
     return this == '('
 }
+
+private fun Char.isNewLine(): Boolean {
+    return this == '\n'
+}
+
+val String.isSuspended get() = this.contains("Suspendable") || this.contains("Blocking")

@@ -96,10 +96,8 @@ internal class UtilsKtTest {
 
     @Language("kotlin")
     private val example1Mockito = """
-        verify(mock)
-        .testNewLine()
-
-    someCode()
+         verify(mock4).testNewLine5
+        someOtherFunction()
     """.trimIndent()
 
     private fun argsEndOfFunctionVariable() = listOf(
@@ -113,9 +111,9 @@ internal class UtilsKtTest {
                     " verify(someClass).testFunction()", IntRange(18, 41) to "testFunction(someParam)"
         ),
         Arguments.of("verify(someClass).testVariable", IntRange(18, 29) to "testVariable"),
-        Arguments.of("verify(someClass).testVariable\n\n", IntRange(18, 31) to "testVariable"),
+        Arguments.of("verify(someClass).testVariable\n\n", IntRange(18, 30) to "testVariable"),
         Arguments.of(multiLineFVInput, IntRange(18, 52) to "testFunction(someParam,someParam)"),
-        Arguments.of(example1Mockito, IntRange(example1Mockito.indexOf(".") + 1, 35) to "testNewLine()"),
+        Arguments.of(example1Mockito, IntRange(example1Mockito.indexOf(".") + 1, 27) to "testNewLine5"),
     )
 
     private fun argsVariableNameFinder() = listOf(

@@ -5,6 +5,9 @@ NOTE! Please review your code after migration, this is tool was developed to hel
 
 TODO
 
+InOrder,
+InSequence
+
 1. Add more tests coverages
 2. Add main function which takes path param to file
 3. **Optional** Convert into gradle plugin?-> Release?
