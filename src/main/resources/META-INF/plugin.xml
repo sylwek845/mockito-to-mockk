@@ -5,7 +5,7 @@
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-    <name>Mockito To Mockk Migration Tool</name>
+    <name>Mockito To MockK Migration Tool</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor email="11651955+sylwek845@users.noreply.github.com" url="https://github.com/sylwek845/mockito-to-mockk">
@@ -17,6 +17,8 @@
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
   Tool to help migration from Mockito to Mockk.
+
+  Please report any issues to github https://github.com/sylwek845/mockito-to-mockk
   ]]></description>
 
     <!-- Product and plugin compatibility requirements.

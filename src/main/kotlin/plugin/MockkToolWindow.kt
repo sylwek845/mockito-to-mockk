@@ -3,6 +3,7 @@ package plugin
 import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
@@ -38,6 +39,7 @@ internal class MockkToolWindow : ToolWindowFactory, DumbAware {
         init {
             contentPanel.layout = BorderLayout(0, 20)
             contentPanel.border = BorderFactory.createEmptyBorder(40, 0, 0, 0)
+            toolWindow.setIcon(AllIcons.Actions.Replace)
             contentPanel.add(createControlsPanel(toolWindow), BorderLayout.CENTER)
         }
 
