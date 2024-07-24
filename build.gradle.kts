@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.sylwek845.mockito_mockk"
-version = "1.0-SNAPSHOT"
+version = loadVersionName()
 
 repositories {
     mavenCentral()
@@ -18,6 +18,7 @@ intellij {
 
     plugins.set(listOf(/* Plugin Dependencies */))
 }
+
 
 
 tasks {
@@ -61,4 +62,8 @@ tasks.test {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "17"
+}
+
+fun loadVersionName(): String = (System.getenv("RELEASE_VERSION") ?: "0.0.1-test").also {
+    println("Load Version -> $it")
 }
