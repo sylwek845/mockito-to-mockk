@@ -109,8 +109,8 @@ class SampleClassTest {
     @Test
     fun setupMocks() {
         // Create mocks
-        val mockDependency1 = mockk(relaxed = true,Dependency1::class.java)
-        val mockDependency2 = mockk(relaxed = true,Dependency2::class.java)
+        val mockDependency1 = mockk(relaxed = true, Dependency1::class.java)
+        val mockDependency2 = mockk(relaxed = true, Dependency2::class.java)
 
         // Define behavior for mocks
         every { mockDependency1.someMethod(anyString()) }.returns(42)
@@ -130,8 +130,8 @@ class SampleClassTest {
     @Test
     fun verifyInteractions() {
         // Create mocks
-        val mockDependency1 = mockk(relaxed = true,Dependency1::class.java)
-        val mockDependency2 = mockk(relaxed = true,Dependency2::class.java)
+        val mockDependency1 = mockk(relaxed = true, Dependency1::class.java)
+        val mockDependency2 = mockk(relaxed = true, Dependency2::class.java)
 
         // Define behavior for mocks
         every { mockDependency1.someMethod(anyString()) }.returns(42)

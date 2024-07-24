@@ -1,5 +1,6 @@
 package tools
 
+import configuration.GlobalConfig.relaxesStatement
 import migration.ImportsConverter
 
 internal object StartingPoints {
@@ -16,11 +17,12 @@ internal object StartingPoints {
         ".thenReturn(",
     )
 
-    val justToReplace = mapOf(
+    val justToReplace
+        get() = mapOf(
         "doReturn" to ReplaceOnlyData("returns") {},
         "doAnswer" to ReplaceOnlyData("answers") {},
         "doThrow" to ReplaceOnlyData("throws") {},
-        "mock(" to ReplaceOnlyData("mockk(relaxed = true,") {},
+            "mock(" to ReplaceOnlyData("mockk($relaxesStatement") {},
         "mock<" to ReplaceOnlyData("mockk<") {},
         "= mock {" to ReplaceOnlyData("= mockk {") {},
         "mock {" to ReplaceOnlyData("mockk {") {},

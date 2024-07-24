@@ -95,24 +95,24 @@ class MockingConverterTest {
             "coEvery { someClass.someFunction(123, date) }"
         ),
         Arguments.of(
-            "on { someClass.someFunction(eq(123), eq(date) }",
+            "on { someClass.someFunction(eq(123), eq(date)) }",
             "every { someClass.someFunction(123, date) }"
         ),
         Arguments.of(
-            "on { someClass.someFunction(eq(123), eq(date) }\nlocation {}",
+            "on { someClass.someFunction(eq(123), eq(date)) }\nlocation {}",
             "every { someClass.someFunction(123, date) }\nlocation {}"
         ),
         Arguments.of(
-            "on { someClass.someFunction(eq(123), eq(date) }.doReturn(1,2,3)",
+            "on { someClass.someFunction(eq(123), eq(date)) }.doReturn(1,2,3)",
             "every { someClass.someFunction(123, date) }.returnsMany(1,2,3)"
         ),
         Arguments.of(
-            "on { \nsomeClass.someFunction(eq(123), eq(date) \n\t\t}",
+            "on { \nsomeClass.someFunction(eq(123), eq(date)) \n\t\t}",
             "every { someClass.someFunction(123, date) }"
         ),
 
         Arguments.of(
-            "on { \nsomeClass.someFunction(eq(123), eq(date) \n\t\t}",
+            "on { \nsomeClass.someFunction(eq(123), eq(date)) \n\t\t}",
             "every { someClass.someFunction(123, date) }"
         ),
         Arguments.of(
