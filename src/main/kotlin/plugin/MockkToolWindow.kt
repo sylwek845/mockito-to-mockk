@@ -51,15 +51,15 @@ internal class MockkToolWindow : ToolWindowFactory, DumbAware {
 
             val migrateButton = JButton("Convert to Mockk")
             val relaxedToggle = OnOffButton()
-            relaxedToggle.onText = "Will Set `relaxed = true`"
-            relaxedToggle.offText = "Will NOT Set `relaxed = true`"
+            relaxedToggle.onText = "Set `relaxed = true` On"
+            relaxedToggle.offText = "Set `relaxed = true` Off"
             relaxedToggle.isSelected = true
             relaxedToggle.addActionListener {
                 GlobalConfig.relaxed = relaxedToggle.isSelected
             }
             val removeEQToggle = OnOffButton()
-            removeEQToggle.offText = "Will Not Remove EQs"
-            removeEQToggle.onText = "Will Remove All EQs"
+            removeEQToggle.offText = "Remove EQs Off"
+            removeEQToggle.onText = "Remove EQs On"
             removeEQToggle.isSelected = true
             removeEQToggle.addActionListener {
                 GlobalConfig.removeEq = removeEQToggle.isSelected
