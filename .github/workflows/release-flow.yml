@@ -24,6 +24,8 @@ jobs:
         run: ./gradlew buildPlugin
       #      - name: Publish Plugin
       #        run: ./gradlew publishPlugin﻿ #do not release yet
+      - name: Rename File
+        run: mv build/distributions/MockitoToMock-*.zip build/distributions/MockitoToMockPlugin.zip
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -32,4 +34,4 @@ jobs:
           generate_release_notes: true
           tag_name: ${{ github.ref_name }}
           files: |
-            build/distributions/MockitoToMock-$RELEASE_VERSION.zip
+            build/distributions/MockitoToMockPlugin.zip
