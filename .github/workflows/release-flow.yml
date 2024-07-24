@@ -1,0 +1,35 @@
+name: Plugin Release
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+  pull_request:
+    branches: [ "master" ] # for test only
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Build with Gradle
+        run: ./gradlew build
+      - name: Test
+        run: ./gradlew test
+      - name: Build Plugin
+        run: ./gradlew buildPlugin
+      #      - name: Publish Plugin
+      #        run: ./gradlew publishPlugin﻿ #do not release yet
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          generate_release_notes: true
+          tag_name: ${{ github.ref_name }}
+          files: |
+            build/distributions/MockitoToMock-$RELEASE_VERSION.zip
