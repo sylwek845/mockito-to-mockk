@@ -1,0 +1,14 @@
+changelog:
+  categories:
+    - title: 🐞 🛠 Bug Fixes 🤦‍♂️
+      labels:
+        - "PR-Bugfix"
+    - title: New Features 🎉
+      labels:
+        - "PR-New-Feature"
+    - title: 👩‍💻Tech Debt
+      labels:
+        - "PR-Tech-Debt"
+    - title: Other Changes
+      labels:
+        - "*"
