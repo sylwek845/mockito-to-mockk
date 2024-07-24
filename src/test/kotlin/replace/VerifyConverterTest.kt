@@ -1,8 +1,10 @@
 package replace
 
+import configuration.GlobalConfig
 import migration.VerifyConverter
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -18,8 +20,16 @@ internal class VerifyConverterTest {
         input: String,
         expected: String
     ) {
+        GlobalConfig.removeEq = true
         val actual = verifyConverter1.convert(input)
         assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `should not remove EQ when flag is off`() {
+        GlobalConfig.removeEq = false
+        val actual = verifyConverter1.convert(inputWithEQ)
+        assertEquals(outputWithEQ, actual)
     }
 
     @Language("kotlin")
@@ -64,7 +74,7 @@ internal class VerifyConverterTest {
             "doSuspendableAnswer(mock, atMost(3)).someMethod(58)",
             "coVerify(atMost = 3) { mock.someMethod(58) }"
         ),
-        Arguments.of("verify(eq(mock), atMost(3)).someMethod(58)", "verify(atMost = 3) { mock.someMethod(58) }"),
+        Arguments.of("verify(eq(mock), atMost(3)).someMethod(eq(58))", "verify(atMost = 3) { mock.someMethod(58) }"),
         Arguments.of("verifyNoMoreInteractions(mock)", "confirmVerified(mock)"),
         Arguments.of("verifyNoMoreInteractions(mock, mock2)", "confirmVerified(mock, mock2)"),
         Arguments.of("verifyNoInteractions(mock)", "verify { mock wasNot Called }"),
@@ -75,4 +85,8 @@ internal class VerifyConverterTest {
         Arguments.of(example1Mockito, example1MockK),
         Arguments.of(example2Mockito, example2MockK),
     )
+
+    private val inputWithEQ = "verify(mock).function(eq(data))"
+
+    private val outputWithEQ = "verify { mock.function(eq(data)) }"
 }

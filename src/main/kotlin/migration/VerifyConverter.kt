@@ -66,7 +66,7 @@ class VerifyConverter {
         } else {
             "${extractedStatement.second}\n"
         }
-        val wholeBlock = "${extractedObjectName}.$extractedBlock"
+        val wholeBlock = "${extractedObjectName}.${removeEqFromText(extractedBlock)}"
         val range = IntRange(startIndex, lastIndex - 1)
         return VerifyData(
             rangeOfOriginalCode = range,
