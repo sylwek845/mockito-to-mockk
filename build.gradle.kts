@@ -13,7 +13,7 @@ repositories {
 }
 
 intellij {
-    version.set("2023.2.6")
+    version.set("2024.1.1")
     type.set("IC") // Target IDE Platform
 
     plugins.set(listOf(/* Plugin Dependencies */))
