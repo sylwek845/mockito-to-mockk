@@ -20,46 +20,59 @@ class VerifyConverter {
         predicates.forEach { predicate ->
             var doneConverting = false
             while (!doneConverting) {
-                val extracted = updatedText.extractVerifyData(predicate)
-                if (extracted != null) {
-                    val isSuspended = predicate.isSuspended
-                    val prefix = if (isSuspended) {
-                        ImportsConverter.addImports("io.mockk.coVerify")
-                        FAKE_CO_VERIFY
-                    } else {
-                        ImportsConverter.addImports("io.mockk.verify")
-                        FAKE_VERIFY
+                when (val extracted = updatedText.extractVerifyData(predicate)) {
+                    VerifyType.Ignore -> {
+                        val prefix = getPrefixToReplace(predicate)
+                        updatedText = updatedText.replaceFirst(PREDICATE, prefix)
                     }
-                    val verifyParams = extracted.remainingVerifyParams.prepareVerifyParamsForMockk()
-                    val toReplace = "$prefix$verifyParams) { ${extracted.extractedVerify.trim()} }"
-                    val currentText = updatedText.replaceRange(extracted.rangeOfOriginalCode, toReplace)
-                    if (currentText == updatedText) {
+
+                    VerifyType.NotFound -> {
                         doneConverting = true
                     }
-                    updatedText = currentText
-                } else {
-                    doneConverting = true
+
+                    is VerifyType.VerifyData -> {
+                        val prefix = getPrefixToReplace(predicate)
+                        val verifyParams = extracted.remainingVerifyParams.prepareVerifyParamsForMockk()
+                        val toReplace = "$prefix$verifyParams) { ${extracted.extractedVerify.trim()} }"
+                        val currentText = updatedText.replaceRange(extracted.rangeOfOriginalCode, toReplace)
+                        if (currentText == updatedText) {
+                            doneConverting = true
+                        }
+                        updatedText = currentText
+                    }
                 }
             }
         }
         return updatedText
     }
 
-    private fun String.extractVerifyData(predicate: String): VerifyData? {
+    private fun getPrefixToReplace(predicate: String): String {
+        val isSuspended = predicate.isSuspended
+        val prefix = if (isSuspended) {
+            ImportsConverter.addImports("io.mockk.coVerify")
+            FAKE_CO_VERIFY
+        } else {
+            ImportsConverter.addImports("io.mockk.verify")
+            FAKE_VERIFY
+        }
+        return prefix
+    }
+
+    private fun String.extractVerifyData(predicate: String): VerifyType {
         val startIndex = indexOf(predicate)
-        if (startIndex == -1) return null
+        if (startIndex == -1) return VerifyType.NotFound
         val previousChar = getOrNull(startIndex - 1)
         if (previousChar == '.') { // Ignore .verify, this most likely does not belong to mockito
-            return null
+            return VerifyType.Ignore
         }
         val bracket = BracketType.Parentheses
         val extracted =
-            substringBetweenBraces(startAfterIndex = startIndex, bracketType = bracket) ?: return null
+            substringBetweenBraces(startAfterIndex = startIndex, bracketType = bracket) ?: return VerifyType.Ignore
         val extractedAll = extracted.split(",")
         val extractedObjectName = removeEqFromText(extractedAll.first())
         val params = extractedAll.drop(1)
         val endBlockIndex = indexOf(startIndex = startIndex, char = '.') + 1
-        val extractedStatement = findEndOfFunctionOrVariable(endBlockIndex) ?: return null
+        val extractedStatement = findEndOfFunctionOrVariable(endBlockIndex) ?: return VerifyType.Ignore
         val lastIndex = extractedStatement.first
         val extractedBlock = if (extractedStatement.second.last() == ')') {
             extractedStatement.second
@@ -68,7 +81,7 @@ class VerifyConverter {
         }
         val wholeBlock = "${extractedObjectName}.${removeEqFromText(extractedBlock)}"
         val range = IntRange(startIndex, lastIndex - 1)
-        return VerifyData(
+        return VerifyType.VerifyData(
             rangeOfOriginalCode = range,
             extractedVerify = wholeBlock,
             remainingVerifyParams = params
@@ -130,11 +143,17 @@ class VerifyConverter {
     private fun String.extractNumberOfVerifications(prefix: String): String =
         substringAfter(prefix).substringBefore(")")
 
-    private data class VerifyData(
-        val rangeOfOriginalCode: IntRange,
-        val extractedVerify: String,
-        val remainingVerifyParams: List<String>,
-    )
+    sealed interface VerifyType {
+
+        data class VerifyData(
+            val rangeOfOriginalCode: IntRange,
+            val extractedVerify: String,
+            val remainingVerifyParams: List<String>,
+        ) : VerifyType
+
+        data object Ignore : VerifyType
+        data object NotFound : VerifyType
+    }
 
     private val predicates = listOf(
         PREDICATE,

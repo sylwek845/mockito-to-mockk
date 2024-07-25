@@ -40,6 +40,7 @@ internal class VerifyConverterTest {
 
     @Language("kotlin")
     private val example2Mockito = """
+        inOrder.verify(something).test()
         verify(mock).testNewLine()
         verify(mock1).testNewLine2(321421,mock())
         verify(mock2).testNewLine5<String>(321421,mock<Long>())
@@ -55,6 +56,7 @@ internal class VerifyConverterTest {
 
     @Language("kotlin")
     private val example2MockK = """
+        inOrder.verify(something).test()
         verify { mock.testNewLine() }
         verify { mock1.testNewLine2(321421,mock()) }
         verify { mock2.testNewLine5<String>(321421,mock<Long>()) }
